@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">ImageConverter</string>
+    <string name="successful_conversion">Конвертация успешно выполнена.</string>
+    <string name="error_conversion">\"Ошибка при конвертации изображения: \"</string>
+    <string name="convert">Convert</string>
+    <string name="conversion_dialog_title">Запуск конвертации</string>
+    <string name="conversion_dialog_message">Хотите отменить?</string>
+    <string name="conversion_dialog_cancel">Cancel</string>
+    <string name="conversion_canceled">Конвертация была отменена</string>
+
 </resources>
