@@ -1,5 +1,6 @@
 package com.example.imageconverter.ui
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.widget.Toast
 import com.example.imageconverter.R
@@ -18,6 +19,9 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     private lateinit var binding: ActivityMainBinding
     private val presenter by moxyPresenter { MainPresenter(AndroidSchedulers.mainThread()) }
 
+    private lateinit var progressDialog: AlertDialog
+    private var conversionCanceled = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -30,7 +34,9 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     private fun convertImage(jpgFileName: String) {
         binding.bConvert.setOnClickListener {
             try {
-                val jpgFilePath = copyAssetFile(jpgFileName)
+                showProgressDialog()
+                conversionCanceled = false
+                val jpgFilePath = copyAssetFileToFileDir(jpgFileName)
                 presenter.convertJPGToPNG(jpgFilePath)
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -39,16 +45,40 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     override fun showConversionResult(status: ConvertStatus) {
+        hideProgressDialog()
         val messageResId = when (status) {
-            ConvertStatus.SUCCESS -> R.string.successful_convertation
-            ConvertStatus.ERROR -> R.string.error_convertation
+            ConvertStatus.SUCCESS -> R.string.successful_conversion
+            ConvertStatus.ERROR -> R.string.error_conversion
+            ConvertStatus.CANCELED -> R.string.conversion_canceled
         }
 
         val message = getString(messageResId)
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
-    private fun copyAssetFile(fileName: String): String {
+    override fun showProgressDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(R.string.conversion_dialog_title)
+        builder.setMessage(R.string.conversion_dialog_message)
+        builder.setCancelable(false)
+        builder.setNegativeButton(R.string.conversion_dialog_cancel) { dialog, _ ->
+            presenter.cancelConversion()
+            dialog.dismiss()
+        }
+
+        progressDialog = builder.create()
+        progressDialog.show()
+    }
+
+    override fun hideProgressDialog() {
+        progressDialog.dismiss()
+    }
+
+    override fun onConversionCanceled() {
+        conversionCanceled = true
+    }
+
+    private fun copyAssetFileToFileDir(fileName: String): String {
         val targetDir = filesDir
         val targetFile = File(targetDir, fileName)
 

@@ -8,4 +8,7 @@ import moxy.viewstate.strategy.StateStrategyType
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface MainView: MvpView {
     fun showConversionResult(status: ConvertStatus)
+    fun showProgressDialog()
+    fun hideProgressDialog()
+    fun onConversionCanceled()
 }
